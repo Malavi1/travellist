@@ -5,7 +5,7 @@ function App() {
   function hangleAddItems(item) {
     setItems((items) => [...items, item]);
   }
-  function handleDleteItem(id) {
+  function handleDeleteItem(id) {
     setItems((items) => items.filter((item) => item.id != id));
   }
   function handleToogleItem(id) {
@@ -15,14 +15,20 @@ function App() {
       )
     );
   }
+  function handleClearItems() {
+    window.alert("are you really want to delete all the items");
+    setItems([]);
+  }
+
   return (
     <div className="app">
       <Logo />
       <Form onAddItems={hangleAddItems} />
       <PackingList
         items={items}
-        onDeleteItem={handleDleteItem}
+        onDeleteItem={handleDeleteItem}
         onToogleItem={handleToogleItem}
+        onClearItems={handleClearItems}
       />
       <Stats items={items} />
     </div>
@@ -35,7 +41,7 @@ function Logo() {
   return <h1>🚩Far Away🌴</h1>;
 }
 function Form({ onAddItems }) {
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState("packed");
   const [quantity, setQuantity] = useState(1);
 
   function handleSubmit(e) {
@@ -44,8 +50,6 @@ function Form({ onAddItems }) {
       return;
     }
     const newItem = { description, quantity, packed: false, id: Date.now() };
-    console.log(newItem);
-
     onAddItems(newItem);
 
     setQuantity(1);
@@ -72,15 +76,25 @@ function Form({ onAddItems }) {
         onChange={(e) => setDescription(e.target.value)}
       ></input>
       <button>Add</button>
-      <PackingList />
     </form>
   );
 }
-function PackingList({ items, onDeleteItem, onToogleItem }) {
+function PackingList({ items, onDeleteItem, onToogleItem, onClearItems }) {
+  const [sortBy, setSortBy] = useState("input");
+  let sortedItems;
+  if (sortBy === "input") sortedItems = items;
+  if (sortBy === "description")
+    sortedItems = items
+      .slice()
+      .sort((a, b) => a.description.localeCompare(b.description));
+  if (sortBy === "packed")
+    sortedItems = items
+      .slice()
+      .sort((a, b) => Number(a.packed) - Number(b.packed));
   return (
     <div className="list">
       <ul>
-        {items?.map((item) => (
+        {sortedItems?.map((item) => (
           <Item
             item={item}
             key={item.id}
@@ -89,6 +103,14 @@ function PackingList({ items, onDeleteItem, onToogleItem }) {
           />
         ))}
       </ul>
+      <div className="actions">
+        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <option value="input">SORT BY INPUT ORDER</option>
+          <option value="description">SORT BY DESCRIPTION</option>
+          <option value="packed">SORT BY PACKED STATUS</option>
+        </select>
+        <button onClick={onClearItems}>CLEAR</button>
+      </div>
     </div>
   );
 }
