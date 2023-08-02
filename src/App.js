@@ -16,8 +16,8 @@ function App() {
     );
   }
   function handleClearItems() {
-    window.alert("are you really want to delete all the items");
-    setItems([]);
+    const conform = window.alert("are you really want to delete all the items");
+    if (conform) setItems([]);
   }
 
   return (
